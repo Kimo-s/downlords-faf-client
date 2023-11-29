@@ -6,8 +6,6 @@ import com.faforever.client.fx.Controller;
 import com.faforever.client.fx.FxApplicationThreadExecutor;
 import com.faforever.client.fx.JavaFxUtil;
 import com.faforever.client.fx.StringListCell;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.scene.Parent;
@@ -19,7 +17,6 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
@@ -30,9 +27,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.beans.EventHandler;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -101,12 +96,8 @@ public class ModManagerController implements Controller<Parent> {
     JavaFxUtil.bindManagedToVisible(closeButton);
     modListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     modListView.setCellFactory(modListCellFactory());
-    modSearchTextField.textProperty().addListener(new ChangeListener<String>() {
-      @Override
-      public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-        onTextChange(newValue);
-      }
-    });
+
+    modSearchTextField.textProperty().addListener((observable, oldValue, newValue) -> filterModList());
 
     viewToggleGroup.selectToggle(uiModsButton);
 
@@ -116,24 +107,9 @@ public class ModManagerController implements Controller<Parent> {
     setCloseable(true);
   }
 
-  private void onTextChange(String newValue){
-    if(newValue.isEmpty()){
-      modVersionFilteredList.setPredicate(viewToggleGroup.getSelectedToggle() == uiModsButton ? UI_FILTER : SIM_FILTER);
-    } else {
-      modVersionFilteredList.setPredicate(getCombinedFilter(newValue));
-    }
-    modVersionFilteredList.forEach(modVersion -> {
-      if (selectedMods.contains(modVersion)) {
-        modListView.getSelectionModel().select(modVersion);
-      } else {
-        modListView.getSelectionModel().clearSelection(modListView.getItems().indexOf(modVersion));
-      }
-    });
-  }
-
-  private Predicate<ModVersionBean> getCombinedFilter(String newValue){
-    return modVersion -> (viewToggleGroup.getSelectedToggle() == uiModsButton ? modVersion.getModType() == ModType.UI : modVersion.getModType() == ModType.SIM)
-        && modVersion.getMod().getDisplayName().toLowerCase().contains(newValue.toLowerCase());
+  private Predicate<ModVersionBean> getCombinedFilter(){
+      return modVersion -> (viewToggleGroup.getSelectedToggle() == uiModsButton ? modVersion.getModType() == ModType.UI : modVersion.getModType() == ModType.SIM)
+          && (modSearchTextField.getText().isEmpty() || modVersion.getMod().getDisplayName().toLowerCase().contains(modSearchTextField.getText().toLowerCase()));
   }
 
   private void loadActivatedMods() {
@@ -149,7 +125,14 @@ public class ModManagerController implements Controller<Parent> {
   }
 
   private void filterModList() {
-    onTextChange(modSearchTextField.getText());
+    modVersionFilteredList.setPredicate(getCombinedFilter());
+    modVersionFilteredList.forEach(modVersion -> {
+      if (selectedMods.contains(modVersion)) {
+        modListView.getSelectionModel().select(modVersion);
+      } else {
+        modListView.getSelectionModel().clearSelection(modListView.getItems().indexOf(modVersion));
+      }
+    });
   }
 
   @NotNull

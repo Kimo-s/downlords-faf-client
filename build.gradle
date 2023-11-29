@@ -8,7 +8,7 @@ buildscript {
 }
 
 plugins {
-  id 'org.springframework.boot' version '3.1.5'
+  id 'org.springframework.boot' version '3.2.0'
   id "com.install4j.gradle" version "10.0.6"
   id "de.undercouch.download" version "5.5.0"
   id 'jacoco'
@@ -294,7 +294,7 @@ dependencies {
   implementation("io.projectreactor.addons:reactor-extra")
   implementation("io.projectreactor:reactor-tools")
 
-  def commonsVersion = "c060e973aa54e1fa215df15c1b8bad22806d84aa"
+  def commonsVersion = "0ff63ee928"
 
   implementation("com.github.FAForever.faf-java-commons:faf-commons-data:${commonsVersion}") {
             exclude module: 'guava'
