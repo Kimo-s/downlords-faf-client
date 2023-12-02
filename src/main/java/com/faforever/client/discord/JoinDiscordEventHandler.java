@@ -1,12 +1,9 @@
 package com.faforever.client.discord;
 
 import com.faforever.client.fx.PlatformService;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -18,36 +15,29 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class JoinDiscordEventHandler implements InitializingBean {
+public class JoinDiscordEventHandler {
 
-  private final EventBus eventBus;
   private final PlatformService platformService;
 
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    eventBus.register(this);
-  }
-
-  @Subscribe
-  public void onJoin(JoinDiscordEvent event) throws URISyntaxException {
-    joinViaDiscord(event.channelUrl());
+  public void onJoin(String channelUrl) {
+    joinViaDiscord(channelUrl);
   }
 
   private void joinViaBrowser(String joinUrl) {
     platformService.showDocument(joinUrl);
   }
 
-  private void joinViaDiscord(String joinUrl) throws URISyntaxException {
+  private void joinViaDiscord(String joinUrl) {
     StandardWebSocketClient client = new StandardWebSocketClient();
     HttpHeaders headers = new HttpHeaders();
     headers.add("Origin", "https://discord.com");
     WebSocketHttpHeaders webSocketHttpHeaders = new WebSocketHttpHeaders(headers);
-    client.doHandshake(getWebSocketHandler(joinUrl), webSocketHttpHeaders, new URI("ws://127.0.0.1:6463/?v=1")).addCallback(result -> {
+    client.doHandshake(getWebSocketHandler(joinUrl), webSocketHttpHeaders, URI.create("ws://127.0.0.1:6463/?v=1"))
+          .addCallback(result -> {
     }, ex -> {
       log.warn("Connection to Discord not possible", ex);
       joinViaBrowser(joinUrl);

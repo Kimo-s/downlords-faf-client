@@ -40,8 +40,8 @@ public class SubDivisionTabControllerTest extends PlatformTest {
 
   @BeforeEach
   public void setUp() throws Exception {
-    loadFxml("theme/leaderboard/subDivisionTab.fxml", clazz -> instance);
-    instance.initialize();
+    loadFxml("theme/leaderboard/sub_division_tab.fxml", clazz -> instance);
+    reinitialize(instance);
   }
 
   @Test

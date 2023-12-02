@@ -4,8 +4,6 @@ import com.faforever.client.chat.ChatUserCategory;
 import com.faforever.client.fx.JavaFxUtil;
 import com.faforever.client.preferences.ChatPrefs;
 import com.faforever.client.util.Assert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ColorPicker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -19,14 +17,12 @@ import static com.faforever.client.chat.ChatColorMode.RANDOM;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Component
 @RequiredArgsConstructor
-public class ChatCategoryColorPickerCustomMenuItemController extends AbstractCustomMenuItemController<ChatUserCategory> {
+public class ChatCategoryColorPickerCustomMenuItemController extends AbstractColorPickerCustomMenuItemController<ChatUserCategory> {
 
   private final ChatPrefs chatPrefs;
 
-  public ColorPicker colorPicker;
-  public Button removeCustomColorButton;
-
-  public void initialize() {
+  @Override
+  protected void onInitialize() {
     removeCustomColorButton.setOnAction(event -> colorPicker.setValue(null));
     removeCustomColorButton.visibleProperty().bind(chatPrefs.chatColorModeProperty().flatMap(chatColorMode -> colorPicker.valueProperty().isNotNull().map(isNotNull -> isNotNull && RANDOM != chatColorMode)));
     JavaFxUtil.bindManagedToVisible(removeCustomColorButton);
